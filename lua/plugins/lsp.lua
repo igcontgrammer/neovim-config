@@ -10,6 +10,33 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
+      -- Configurar ventanas flotantes con bordes
+      local border = "rounded"
+      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+        border = border,
+      })
+      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+        border = border,
+      })
+
+      -- Configurar diagnósticos con bordes
+      vim.diagnostic.config({
+        virtual_text = {
+          prefix = "●",
+          spacing = 4,
+        },
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+        float = {
+          border = border,
+          source = "always",
+          header = "",
+          prefix = "",
+        },
+      })
+
       -- Configurar keymaps LSP automáticamente cuando se adjunta un LSP
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
@@ -114,7 +141,9 @@ return {
         capabilities = capabilities,
         settings = {
           ["rust-analyzer"] = {
-            checkOnSave = { command = "clippy" },
+            check = {
+              command = "clippy",
+            },
           },
         },
       })

@@ -171,15 +171,16 @@ map("n", "<leader>ws", "<cmd>split<CR>", { desc = "Horizontal split" })
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write file" })
 
 -- Terminal (nvterm)
-map("n", "<leader>te", function()
+map("n", "<leader>t", function()
   require("nvterm.terminal").toggle("vertical")
 end, { desc = "Toggle terminal" })
-map("t", "<leader>te", function()
+map("t", "<leader>t", function()
   require("nvterm.terminal").toggle("vertical")
 end, { desc = "Toggle terminal" })
+map("t", "<leader>x", "<C-\\><C-n>:q<CR>", { desc = "Salir del terminal" })
 
 -- Tabs
-map("n", "<leader>t", ":tabnew<CR>", { desc = "Nuevo Tab" })
+map("n", "<leader>tn", ":tabnew<CR>", { desc = "Nuevo Tab" })
 map("n", "<leader>tt", ":tabclose<CR>", { desc = "Cerrar Tab" })
 
 -- Code action
@@ -193,3 +194,36 @@ map("n", "<leader>d", function()
     source = "always",
   })
 end, { desc = "Mostrar error del LSP" })
+
+-- ══════════════════════════════════════════════════════════════
+-- NEOVIDE ZOOM
+-- ══════════════════════════════════════════════════════════════
+if vim.g.neovide then
+  local change_scale_factor = function(delta)
+    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
+  end
+
+  -- Zoom in
+  map("n", "<D-=>", function()
+    change_scale_factor(1.1)
+  end, { desc = "Zoom in" })
+  map("n", "<C-=>", function()
+    change_scale_factor(1.1)
+  end, { desc = "Zoom in" })
+
+  -- Zoom out
+  map("n", "<D-->", function()
+    change_scale_factor(1 / 1.1)
+  end, { desc = "Zoom out" })
+  map("n", "<C-->", function()
+    change_scale_factor(1 / 1.1)
+  end, { desc = "Zoom out" })
+
+  -- Reset zoom
+  map("n", "<D-0>", function()
+    vim.g.neovide_scale_factor = 1.0
+  end, { desc = "Reset zoom" })
+  map("n", "<C-0>", function()
+    vim.g.neovide_scale_factor = 1.0
+  end, { desc = "Reset zoom" })
+end

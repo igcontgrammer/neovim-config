@@ -46,6 +46,7 @@ return {
         "gitignore",
         "diff",
         "comment",
+        "prisma",
       },
       highlight = {
         enable = true,
