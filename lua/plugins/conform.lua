@@ -26,9 +26,6 @@ return {
         markdown = { "prettier" },
         graphql = { "prettier" },
 
-        -- C#
-        cs = { "csharpier" },
-
         -- Go
         go = { "gofmt", "goimports" },
 

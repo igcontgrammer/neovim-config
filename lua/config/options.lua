@@ -14,13 +14,12 @@ opt.number = true
 opt.numberwidth = 2 -- Ancho mínimo de la columna de números
 
 -- Indentación
-opt.expandtab = true -- Convertir tabs en espacios
-opt.shiftwidth = 2 -- Ancho de indentación (>> y <<)
-opt.tabstop = 2 -- Ancho de un tab
-opt.softtabstop = 2 -- Comportamiento de tab/backspace
-opt.smartindent = true -- Indentación inteligente
-opt.autoindent = true -- Copiar indentación de la línea anterior
-opt.breakindent = true -- Mantener indentación en líneas wrapped
+vim.opt.expandtab = true -- usa espacios en vez de tabs
+vim.opt.shiftwidth = 4 -- tamaño de indentación
+vim.opt.tabstop = 4 -- tamaño visual del tab
+vim.opt.softtabstop = 4 -- espacios que inserta Tab
+vim.opt.autoindent = true -- copia indentación de la línea actual
+vim.opt.smartindent = true -- indentación inteligente
 
 -- Padding/Spacing
 opt.signcolumn = "yes" -- Siempre mostrar signcolumn (1 columna)

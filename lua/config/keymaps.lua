@@ -171,13 +171,14 @@ map("n", "<leader>ws", "<cmd>split<CR>", { desc = "Horizontal split" })
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write file" })
 
 -- Terminal (nvterm)
-map("n", "<leader>t", function()
+map("n", "<leader>te", function()
   require("nvterm.terminal").toggle("vertical")
 end, { desc = "Toggle terminal" })
 map("t", "<leader>t", function()
   require("nvterm.terminal").toggle("vertical")
 end, { desc = "Toggle terminal" })
-map("t", "<leader>x", "<C-\\><C-n>:q<CR>", { desc = "Salir del terminal" })
+map("t", "<Esc>", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
+map("t", "<leader>x", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
 
 -- Tabs
 map("n", "<leader>tn", ":tabnew<CR>", { desc = "Nuevo Tab" })

@@ -9,9 +9,14 @@ return {
 
       -- TypeScript snippets
       ls.add_snippets("typescript", {
+        s("sepa", {
+          t("// ******* "),
+          i(1),
+          t(" *******"),
+        }),
         s("todo", {
           t("// TODO: "),
-          i(1, "description"),
+          i(1),
         }),
       })
 
@@ -20,7 +25,7 @@ return {
         -- TODO comment
         s("todo", {
           t("# TODO: "),
-          i(1, "description"),
+          i(1),
         }),
 
         -- FIXME comment
@@ -141,8 +146,11 @@ return {
           -- Confirmar selección
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
+            local copilot_suggestion = vim.fn["copilot#GetDisplayedSuggestion"]()
+            if copilot_suggestion.text ~= "" then
+              vim.api.nvim_feedkeys(vim.fn["copilot#Accept"](), "n", true)
+            elseif cmp.visible() then
+              cmp.confirm({ select = true })
             elseif luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
             else

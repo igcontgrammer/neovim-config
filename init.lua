@@ -35,8 +35,29 @@ require("lazy").setup({
   -- colorscheme that will be used when installing plugins.
   install = { colorscheme = { "tokyonight", "habamax" } },
   -- automatically check for plugin updates
-  checker = { enabled = true },
+  checker = { enabled = false },
 })
 
 -- Load keymaps after plugins
 require("config.keymaps")
+
+-- Load custom highlights after plugins
+require("config.highlights")
+
+require("nvim-ts-autotag").setup({
+  opts = {
+    -- Defaults
+    enable_close = true, -- Auto close tags
+    enable_rename = true, -- Auto rename pairs of tags
+    enable_close_on_slash = false, -- Auto close on trailing </
+  },
+  -- Also override individual filetype configs, these take priority.
+  -- Empty by default, useful if one of the "opts" global settings
+  -- doesn't work well in a specific filetype
+  per_filetype = {
+    ["html"] = {
+      enable_close = false,
+    },
+  },
+})
+require("lualine").setup()
