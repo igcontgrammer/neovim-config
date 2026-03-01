@@ -122,11 +122,7 @@ map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yank" })
 map("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix" })
 map("n", "[q", "<cmd>cprev<cr>zz", { desc = "Prev quickfix" })
 
--- Split navigation mejorada
-map("n", "<C-h>", "<C-w>h")
-map("n", "<C-j>", "<C-w>j")
-map("n", "<C-k>", "<C-w>k")
-map("n", "<C-l>", "<C-w>l")
+-- Split navigation handled by vim-tmux-navigator
 
 -- Resize splits
 local RESIZE_AMOUNT = 2
@@ -171,13 +167,12 @@ map("n", "<leader>ws", "<cmd>split<CR>", { desc = "Horizontal split" })
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write file" })
 
 -- Terminal (nvterm)
-map("n", "<leader>te", function()
+map("n", "<leader>]", function()
   require("nvterm.terminal").toggle("vertical")
 end, { desc = "Toggle terminal" })
-map("t", "<leader>t", function()
+map("t", "<leader>]", function()
   require("nvterm.terminal").toggle("vertical")
 end, { desc = "Toggle terminal" })
-map("t", "<Esc>", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
 map("t", "<leader>x", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
 
 -- Tabs
@@ -196,6 +191,8 @@ map("n", "<leader>d", function()
   })
 end, { desc = "Mostrar error del LSP" })
 
+-- goto preview
+vim.keymap.set("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })
 -- ══════════════════════════════════════════════════════════════
 -- NEOVIDE ZOOM
 -- ══════════════════════════════════════════════════════════════

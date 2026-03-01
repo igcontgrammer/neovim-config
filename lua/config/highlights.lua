@@ -61,6 +61,6 @@ end
 apply_highlights()
 
 -- Reaplicar cuando cambie el colorscheme
--- vim.api.nvim_create_autocmd("ColorScheme", {
---   callback = apply_highlights,
--- })
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = apply_highlights,
+})

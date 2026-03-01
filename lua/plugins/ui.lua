@@ -53,7 +53,15 @@ return {
     event = "VeryLazy",
     opts = {
       input = { enabled = true, default_prompt = "➤ " },
-      select = { enabled = true, backend = { "telescope", "builtin" } },
+      select = {
+        enabled = true,
+        backend = { "telescope", "builtin" },
+        get_config = function(opts)
+          if opts.kind == "avante" then
+            return { enabled = false }
+          end
+        end,
+      },
     },
   },
   {

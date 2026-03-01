@@ -4,7 +4,7 @@ return {
   priority = 1000,
   config = function()
     -- Configuración de gruvbox-material
-    vim.g.gruvbox_material_background = "medium" -- 'hard', 'medium', 'soft'
+    vim.g.gruvbox_material_background = "soft" -- 'hard', 'medium', 'soft'
     vim.g.gruvbox_material_foreground = "mix" -- 'material', 'mix', 'original'
     vim.g.gruvbox_material_enable_italic = true
     vim.g.gruvbox_material_enable_bold = true
