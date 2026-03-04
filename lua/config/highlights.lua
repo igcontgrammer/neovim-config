@@ -9,6 +9,8 @@ local function apply_highlights()
     "Constant",
     "Number",
     "Boolean",
+    "Keyword",
+    "repeat",
   }
 
   for _, group in ipairs(groups) do

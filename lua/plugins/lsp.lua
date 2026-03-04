@@ -7,7 +7,7 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
+      "saghen/blink.cmp",
     },
     config = function()
       -- Configurar ventanas flotantes con bordes
@@ -111,9 +111,8 @@ return {
         end,
       })
 
-      -- Capacidades de LSP con nvim-cmp
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+      -- Capacidades de LSP con blink.cmp
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       -- Configurar LSP servers usando la API moderna de Neovim 0.11+
       -- Lua
