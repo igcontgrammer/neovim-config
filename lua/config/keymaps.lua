@@ -175,6 +175,12 @@ map("t", "<leader>]", function()
 end, { desc = "Toggle terminal" })
 map("t", "<leader>x", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
 
+-- Navegación entre splits desde terminal mode
+map("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Move to left split" })
+map("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Move to bottom split" })
+map("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Move to top split" })
+map("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Move to right split" })
+
 -- Tabs
 map("n", "<leader>tn", ":tabnew<CR>", { desc = "Nuevo Tab" })
 map("n", "<leader>tt", ":tabclose<CR>", { desc = "Cerrar Tab" })
@@ -191,8 +197,88 @@ map("n", "<leader>d", function()
   })
 end, { desc = "Mostrar error del LSP" })
 
+-- move between tabs
+vim.keymap.set("n", "<leader>tl", ":tabnext<CR>")
+
+-- tab anterior
+vim.keymap.set("n", "<leader>th", ":tabprevious<CR>")
+
 -- goto preview
 vim.keymap.set("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })
+
+vim.keymap.set("v", "<leader>sg", function()
+  -- Get the selected text
+  local start_pos = vim.fn.getpos("'<")
+  local end_pos = vim.fn.getpos("'>")
+  local lines = vim.fn.getline(start_pos[2], end_pos[2])
+
+  if #lines == 0 then
+    return
+  end
+
+  -- Handle single line selection
+  if #lines == 1 then
+    lines[1] = string.sub(lines[1], start_pos[3], end_pos[3])
+  else
+    -- Handle multi-line selection
+    lines[1] = string.sub(lines[1], start_pos[3])
+    lines[#lines] = string.sub(lines[#lines], 1, end_pos[3])
+  end
+
+  local selected_text = table.concat(lines, "\n")
+
+  -- Escape special characters for grep
+  selected_text = vim.fn.escape(selected_text, "\\.*[]^$()+?{}")
+
+  -- Use the selected text for grep
+  if pcall(require, "snacks") then
+    require("snacks").picker.grep({ search = selected_text })
+  elseif pcall(require, "fzf-lua") then
+    require("fzf-lua").live_grep({ search = selected_text })
+  else
+    vim.notify("No grep picker available", vim.log.levels.ERROR)
+  end
+end, { desc = "Grep Selected Text" })
+
+-- Grep keybinding for visual mode with G - search selected text at root level
+vim.keymap.set("v", "<leader>sG", function()
+  -- Get git root or fallback to cwd
+  local git_root = vim.fn.system("git rev-parse --show-toplevel 2>/dev/null"):gsub("\n", "")
+  local root = vim.v.shell_error == 0 and git_root ~= "" and git_root or vim.fn.getcwd()
+
+  -- Get the selected text
+  local start_pos = vim.fn.getpos("'<")
+  local end_pos = vim.fn.getpos("'>")
+  local lines = vim.fn.getline(start_pos[2], end_pos[2])
+
+  if #lines == 0 then
+    return
+  end
+
+  -- Handle single line selection
+  if #lines == 1 then
+    lines[1] = string.sub(lines[1], start_pos[3], end_pos[3])
+  else
+    -- Handle multi-line selection
+    lines[1] = string.sub(lines[1], start_pos[3])
+    lines[#lines] = string.sub(lines[#lines], 1, end_pos[3])
+  end
+
+  local selected_text = table.concat(lines, "\n")
+
+  -- Escape special characters for grep
+  selected_text = vim.fn.escape(selected_text, "\\.*[]^$()+?{}")
+
+  -- Use the selected text for grep at root level
+  if pcall(require, "snacks") then
+    require("snacks").picker.grep({ search = selected_text, cwd = root })
+  elseif pcall(require, "fzf-lua") then
+    require("fzf-lua").live_grep({ search = selected_text, cwd = root })
+  else
+    vim.notify("No grep picker available", vim.log.levels.ERROR)
+  end
+end, { desc = "Grep Selected Text (Root Dir)" })
+
 -- ══════════════════════════════════════════════════════════════
 -- NEOVIDE ZOOM
 -- ══════════════════════════════════════════════════════════════

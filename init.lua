@@ -61,5 +61,5 @@ require("nvim-ts-autotag").setup({
   },
 })
 require("lualine").setup()
-
-vim.cmd.colorscheme("gruvbox-material")
+require("oil").setup()
+vim.api.nvim_set_hl(0, "Comment", { italic = true })

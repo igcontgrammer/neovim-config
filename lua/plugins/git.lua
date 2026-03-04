@@ -16,11 +16,11 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "sindrets/diffview.nvim",
-      "nvim-telescope/telescope.nvim",
+      "ibhagwan/fzf-lua",
     },
     cmd = "Neogit",
     opts = {
-      integrations = { diffview = true, telescope = true },
+      integrations = { diffview = true, fzf_lua = true },
       signs = {
         section = { "", "" },
         item = { "", "" },
