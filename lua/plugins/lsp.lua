@@ -64,10 +64,10 @@ return {
               require("omnisharp_extended").lsp_type_definition()
             end, "Type Definition")
           else
-            map("gd", "<cmd>FzfLua lsp_definitions<cr>", "Goto Definition")
-            map("gr", "<cmd>FzfLua lsp_references<cr>", "Goto References")
-            map("gI", "<cmd>FzfLua lsp_implementations<cr>", "Goto Implementation")
-            map("gy", "<cmd>FzfLua lsp_typedefs<cr>", "Type Definition")
+            map("gd", "<cmd>Telescope lsp_definitions<cr>", "Goto Definition")
+            map("gr", "<cmd>Telescope lsp_references<cr>", "Goto References")
+            map("gI", "<cmd>Telescope lsp_implementations<cr>", "Goto Implementation")
+            map("gy", "<cmd>Telescope lsp_type_definitions<cr>", "Type Definition")
             map("gD", vim.lsp.buf.declaration, "Goto Declaration")
           end
 
