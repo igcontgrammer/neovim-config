@@ -1,13 +1,9 @@
 return {
   {
-    "Hoffs/omnisharp-extended-lsp.nvim",
-    lazy = true,
-  },
-  {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
+      "saghen/blink.cmp",
     },
     config = function()
       -- Configurar ventanas flotantes con bordes
@@ -46,30 +42,11 @@ return {
           end
 
           -- Navegación
-          -- Para C#, usar omnisharp-extended
-          if vim.bo[event.buf].filetype == "cs" then
-            map("gd", function()
-              require("omnisharp_extended").lsp_definitions()
-            end, "Goto Definition")
-            map("gD", function()
-              require("omnisharp_extended").lsp_definition()
-            end, "Goto Declaration")
-            map("gr", function()
-              require("omnisharp_extended").lsp_references()
-            end, "Goto References")
-            map("gI", function()
-              require("omnisharp_extended").lsp_implementation()
-            end, "Goto Implementation")
-            map("gy", function()
-              require("omnisharp_extended").lsp_type_definition()
-            end, "Type Definition")
-          else
-            map("gd", "<cmd>Telescope lsp_definitions<cr>", "Goto Definition")
-            map("gr", "<cmd>Telescope lsp_references<cr>", "Goto References")
-            map("gI", "<cmd>Telescope lsp_implementations<cr>", "Goto Implementation")
-            map("gy", "<cmd>Telescope lsp_type_definitions<cr>", "Type Definition")
-            map("gD", vim.lsp.buf.declaration, "Goto Declaration")
-          end
+          map("gd", "<cmd>Telescope lsp_definitions<cr>", "Goto Definition")
+          map("gr", "<cmd>Telescope lsp_references<cr>", "Goto References")
+          map("gI", "<cmd>Telescope lsp_implementations<cr>", "Goto Implementation")
+          map("gy", "<cmd>Telescope lsp_type_definitions<cr>", "Type Definition")
+          map("gD", vim.lsp.buf.declaration, "Goto Declaration")
 
           -- Información
           map("K", vim.lsp.buf.hover, "Hover Documentation")
@@ -111,9 +88,8 @@ return {
         end,
       })
 
-      -- Capacidades de LSP con nvim-cmp
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+      -- Capacidades de LSP con blink.cmp
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       -- Configurar LSP servers usando la API moderna de Neovim 0.11+
       -- Lua
@@ -162,20 +138,24 @@ return {
         capabilities = capabilities,
       })
 
-      -- C#
-      vim.lsp.config("omnisharp", {
-        cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
-        root_markers = { "*.sln", "*.csproj", "*.fsproj", "omnisharp.json", ".git" },
+      -- C# via Roslyn (managed by roslyn.nvim plugin)
+      vim.lsp.config("roslyn", {
         capabilities = capabilities,
         settings = {
-          FormattingOptions = {
-            EnableEditorConfigSupport = true,
-            OrganizeImports = true,
+          ["csharp|background_analysis"] = {
+            dotnet_analyzer_diagnostics_scope = "openFiles",
+            dotnet_compiler_diagnostics_scope = "openFiles",
           },
-          RoslynExtensionsOptions = {
-            EnableAnalyzersSupport = true,
-            EnableImportCompletion = true,
-            AnalyzeOpenDocumentsOnly = false,
+          ["csharp|completion"] = {
+            dotnet_show_completion_items_from_unimported_namespaces = true,
+            dotnet_show_name_completion_suggestions = true,
+          },
+          ["csharp|inlay_hints"] = {
+            csharp_enable_inlay_hints_for_implicit_variable_types = true,
+            csharp_enable_inlay_hints_for_types = true,
+          },
+          ["csharp|code_lens"] = {
+            dotnet_enable_references_code_lens = true,
           },
         },
       })
@@ -207,7 +187,6 @@ return {
         "rust_analyzer",
         "pyright",
         "ts_ls",
-        "omnisharp",
         "clangd",
         "html",
         "cssls",
@@ -234,7 +213,6 @@ return {
         "rust-analyzer",
         "pyright",
         "typescript-language-server",
-        "omnisharp",
         "clangd",
         "html-lsp",
         "css-lsp",
@@ -259,6 +237,10 @@ return {
     cmd = "Mason",
     build = ":MasonUpdate",
     opts = {
+      registries = {
+        "github:mason-org/mason-registry",
+        "github:Crashdummyy/mason-registry",
+      },
       ui = {
         border = "rounded",
         icons = {

@@ -166,20 +166,22 @@ map("n", "<leader>ws", "<cmd>split<CR>", { desc = "Horizontal split" })
 -- Write/Quit
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write file" })
 
--- Terminal (nvterm)
-map("n", "<leader>]", function()
-  require("nvterm.terminal").toggle("vertical")
-end, { desc = "Toggle terminal" })
-map("t", "<leader>]", function()
-  require("nvterm.terminal").toggle("vertical")
-end, { desc = "Toggle terminal" })
+-- Terminal (snacks.terminal) — horizontal split, bottom, persistent across toggles
+local function toggle_term()
+  require("snacks.terminal").toggle(nil, {
+    win = { position = "bottom", height = 0.3, border = "rounded" },
+  })
+end
+map({ "n", "t" }, "<leader>]", toggle_term, { desc = "Toggle terminal" })
+map({ "n", "t" }, "<C-/>", toggle_term, { desc = "Toggle terminal" })
+map({ "n", "t" }, "<C-_>", toggle_term, { desc = "Toggle terminal (tmux fallback)" })
 map("t", "<leader>x", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
 
--- Navegación entre splits desde terminal mode
-map("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Move to left split" })
-map("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Move to bottom split" })
-map("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Move to top split" })
-map("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Move to right split" })
+-- Navegación entre splits desde terminal mode (tmux-aware)
+map("t", "<C-h>", [[<C-\><C-n><cmd>TmuxNavigateLeft<cr>]], { desc = "Navigate left" })
+map("t", "<C-j>", [[<C-\><C-n><cmd>TmuxNavigateDown<cr>]], { desc = "Navigate down" })
+map("t", "<C-k>", [[<C-\><C-n><cmd>TmuxNavigateUp<cr>]], { desc = "Navigate up" })
+map("t", "<C-l>", [[<C-\><C-n><cmd>TmuxNavigateRight<cr>]], { desc = "Navigate right" })
 
 -- Tabs
 map("n", "<leader>tn", ":tabnew<CR>", { desc = "Nuevo Tab" })
@@ -198,10 +200,16 @@ map("n", "<leader>d", function()
 end, { desc = "Mostrar error del LSP" })
 
 -- move between tabs
-vim.keymap.set("n", "<leader>tl", ":tabnext<CR>")
+vim.keymap.set("n", "<leader>tl", ":tabnext<CR>", { desc = "Next tab" })
 
 -- tab anterior
-vim.keymap.set("n", "<leader>th", ":tabprevious<CR>")
+vim.keymap.set("n", "<leader>th", ":tabprevious<CR>", { desc = "Prev tab" })
+
+-- Ciclar entre tabs
+map("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
+map("n", "[t", "<cmd>tabprevious<CR>", { desc = "Prev tab" })
+map("n", "<Tab>", "<cmd>tabnext<CR>", { desc = "Next tab" })
+map("n", "<S-Tab>", "<cmd>tabprevious<CR>", { desc = "Prev tab" })
 
 -- goto preview
 vim.keymap.set("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })

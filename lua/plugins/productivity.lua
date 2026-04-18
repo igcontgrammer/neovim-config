@@ -64,15 +64,4 @@ return {
       need = 1,
     },
   },
-  {
-    "NvChad/nvterm",
-    opts = {
-      terminals = {
-        type_opts = {
-          horizontal = { location = "rightbelow", split_ratio = 0.3 },
-          vertical = { location = "rightbelow", split_ratio = 0.5 },
-        },
-      },
-    },
-  },
 }

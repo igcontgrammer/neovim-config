@@ -12,8 +12,8 @@ return {
       "debugloop/telescope-undo.nvim",
     },
     keys = {
-      { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
       { "<leader><space>", "<cmd>Telescope find_files<cr>", desc = "Find files" },
+      { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
       { "<leader>fa", "<cmd>Telescope find_files hidden=true no_ignore=true<cr>", desc = "Find all files" },
       { "<leader>fw", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
       { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },

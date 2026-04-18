@@ -103,13 +103,21 @@ return {
     },
   },
   config = function()
+    local cmd = "opencode --port"
+    local snacks_opts = {
+      win = { position = "left", width = math.floor(vim.o.columns * 0.35) },
+    }
     vim.g.opencode_opts = {
-      provider = {
-        snacks = {
-          win = {
-            position = "left",
-          },
-        },
+      server = {
+        start = function()
+          require("snacks.terminal").open(cmd, snacks_opts)
+        end,
+        stop = function()
+          require("snacks.terminal").get(cmd, snacks_opts):close()
+        end,
+        toggle = function()
+          require("snacks.terminal").toggle(cmd, snacks_opts)
+        end,
       },
     }
     vim.o.autoread = true

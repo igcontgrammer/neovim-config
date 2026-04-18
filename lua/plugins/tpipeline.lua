@@ -1,1 +1,6 @@
-return { "vimpostor/vim-tpipeline" }
+return {
+  {
+    "vimpostor/vim-tpipeline",
+    enabled = false,
+  },
+}

@@ -46,6 +46,9 @@ return {
         -- TOML
         toml = { "taplo" },
 
+        -- C#
+        cs = { "csharpier" },
+
         -- C/C++
         c = { "clang_format" },
         cpp = { "clang_format" },
