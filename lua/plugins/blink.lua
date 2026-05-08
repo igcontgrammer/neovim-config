@@ -6,22 +6,21 @@ return {
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
+    enabled = function()
+      local disabled_ft = {
+        NvimTree = true,
+        ["neo-tree"] = true,
+        ["neo-tree-popup"] = true,
+        oil = true,
+        TelescopePrompt = true,
+        ["snacks_picker_input"] = true,
+      }
+      return not disabled_ft[vim.bo.filetype] and vim.bo.buftype ~= "prompt"
+    end,
     snippets = { preset = "luasnip" },
     keymap = {
       preset = "default",
       ["<CR>"] = { "accept", "fallback" },
-      ["<Tab>"] = {
-        function(cmp)
-          -- Copilot tiene prioridad sobre el menú del LSP
-          if vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
-            vim.api.nvim_feedkeys(vim.fn["copilot#Accept"](""), "n", true)
-            return true
-          elseif cmp.snippet_active() then
-            return cmp.snippet_forward()
-          end
-        end,
-        "fallback",
-      },
       ["<S-Tab>"] = { "snippet_backward", "fallback" },
       ["<C-n>"] = { "select_next", "fallback" },
       ["<C-p>"] = { "select_prev", "fallback" },

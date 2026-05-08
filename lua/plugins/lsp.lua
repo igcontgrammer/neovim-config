@@ -6,14 +6,9 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
-      -- Configurar ventanas flotantes con bordes
+      -- Bordes redondeados para floats (hover, signature, etc.)
       local border = "rounded"
-      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-        border = border,
-      })
-      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-        border = border,
-      })
+      vim.o.winborder = border
 
       -- Configurar diagnósticos con bordes
       vim.diagnostic.config({
@@ -95,7 +90,16 @@ return {
       -- Lua
       vim.lsp.config("lua_ls", {
         cmd = { "lua-language-server" },
-        root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" },
+        root_markers = {
+          ".luarc.json",
+          ".luarc.jsonc",
+          ".luacheckrc",
+          ".stylua.toml",
+          "stylua.toml",
+          "selene.toml",
+          "selene.yml",
+          ".git",
+        },
         capabilities = capabilities,
         settings = {
           Lua = {
@@ -127,7 +131,15 @@ return {
       -- Python
       vim.lsp.config("pyright", {
         cmd = { "pyright-langserver", "--stdio" },
-        root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json", ".git" },
+        root_markers = {
+          "pyproject.toml",
+          "setup.py",
+          "setup.cfg",
+          "requirements.txt",
+          "Pipfile",
+          "pyrightconfig.json",
+          ".git",
+        },
         capabilities = capabilities,
       })
 
@@ -163,7 +175,15 @@ return {
       -- C/C++
       vim.lsp.config("clangd", {
         cmd = { "clangd" },
-        root_markers = { ".clangd", ".clang-tidy", ".clang-format", "compile_commands.json", "compile_flags.txt", "configure.ac", ".git" },
+        root_markers = {
+          ".clangd",
+          ".clang-tidy",
+          ".clang-format",
+          "compile_commands.json",
+          "compile_flags.txt",
+          "configure.ac",
+          ".git",
+        },
         capabilities = capabilities,
       })
 
@@ -181,6 +201,14 @@ return {
         capabilities = capabilities,
       })
 
+      -- Zig
+      vim.lsp.config("zls", {
+        cmd = { "zls" },
+        root_markers = { "build.zig", "build.zig.zon", ".git" },
+        filetypes = { "zig", "zon" },
+        capabilities = capabilities,
+      })
+
       -- Habilitar todos los LSP servers
       vim.lsp.enable({
         "lua_ls",
@@ -190,6 +218,7 @@ return {
         "clangd",
         "html",
         "cssls",
+        "zls",
       })
     end,
   },
@@ -201,6 +230,7 @@ return {
     },
     opts = {
       automatic_installation = true,
+      automatic_enable = false,
     },
   },
   {
@@ -216,10 +246,11 @@ return {
         "clangd",
         "html-lsp",
         "css-lsp",
+        "roslyn",
+        "zls",
 
         -- Formatters
         "stylua",
-        "rustfmt",
         "ruff",
         "prettier",
         "csharpier",

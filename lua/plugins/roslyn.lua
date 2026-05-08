@@ -10,7 +10,13 @@ return {
     opts = {
       filewatching = "auto",
       broad_search = false,
-      lock_target = false,
+      lock_target = true,
+      choose_target = function(targets)
+        table.sort(targets, function(a, b)
+          return #a < #b
+        end)
+        return targets[1]
+      end,
     },
   },
 }

@@ -30,7 +30,7 @@ return {
         go = { "gofmt", "goimports" },
 
         -- Rust
-        rust = { "rustfmt" },
+        rust = {},
 
         -- Lua
         lua = { "stylua" },

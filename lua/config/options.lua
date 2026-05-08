@@ -84,7 +84,7 @@ vim.diagnostic.config({
 -- ══════════════════════════════════════════════════════════════
 if vim.g.neovide then
   -- Fuente
-  vim.o.guifont = "JetBrains Mono:h14"
+  vim.o.guifont = "MonoLisa Variable Medium:h14"
 
   -- Título de la ventana con el path actual
   opt.title = true

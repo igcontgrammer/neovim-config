@@ -5,19 +5,17 @@
 local map = vim.keymap.set
 
 -- ══════════════════════════════════════════════════════════════
--- SPECTRE (buscar/reemplazar)
+-- GRUG-FAR (buscar/reemplazar proyecto)
 -- ══════════════════════════════════════════════════════════════
-map("n", "<leader>sr", function()
-  require("spectre").toggle()
-end, { desc = "Search & Replace" })
+map("n", "<leader>sr", "<cmd>GrugFar<cr>", { desc = "Search & Replace" })
 map("n", "<leader>sw", function()
-  require("spectre").open_visual({ select_word = true })
+  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
 end, { desc = "Search current word" })
 map("v", "<leader>sw", function()
-  require("spectre").open_visual()
+  require("grug-far").with_visual_selection({ prefills = {} })
 end, { desc = "Search selection" })
 map("n", "<leader>sf", function()
-  require("spectre").open_file_search({ select_word = true })
+  require("grug-far").open({ prefills = { paths = vim.fn.expand("%") } })
 end, { desc = "Search in current file" })
 
 -- ══════════════════════════════════════════════════════════════
@@ -208,8 +206,10 @@ vim.keymap.set("n", "<leader>th", ":tabprevious<CR>", { desc = "Prev tab" })
 -- Ciclar entre tabs
 map("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
 map("n", "[t", "<cmd>tabprevious<CR>", { desc = "Prev tab" })
-map("n", "<Tab>", "<cmd>tabnext<CR>", { desc = "Next tab" })
-map("n", "<S-Tab>", "<cmd>tabprevious<CR>", { desc = "Prev tab" })
+map("n", "<M-Tab>", "<cmd>tabnext<CR>", { desc = "Next tab" })
+map("n", "<M-S-Tab>", "<cmd>tabprevious<CR>", { desc = "Prev tab" })
+map("n", "<M-l>", "<cmd>tabnext<CR>", { desc = "Next tab" })
+map("n", "<M-h>", "<cmd>tabprevious<CR>", { desc = "Prev tab" })
 
 -- goto preview
 vim.keymap.set("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })

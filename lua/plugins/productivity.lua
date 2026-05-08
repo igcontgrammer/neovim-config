@@ -24,13 +24,11 @@ return {
     },
   },
   {
-    "nvim-pack/nvim-spectre",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    cmd = "Spectre",
+    "MagicDuck/grug-far.nvim",
+    cmd = { "GrugFar", "GrugFarWithin" },
     opts = {
-      open_cmd = "noswapfile vnew",
-      live_update = true,
-      is_insert_mode = true,
+      headerMaxWidth = 80,
+      windowCreationCommand = "vsplit",
     },
   },
   {
