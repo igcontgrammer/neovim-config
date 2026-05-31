@@ -44,9 +44,6 @@ require("lazy").setup({
 -- Load keymaps after plugins
 require("config.keymaps")
 
--- Load custom highlights after plugins
-require("config.highlights")
-
 require("nvim-ts-autotag").setup({
   opts = {
     -- Defaults

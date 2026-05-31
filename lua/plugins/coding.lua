@@ -13,11 +13,6 @@ return {
     opts = {},
   },
   {
-    "numToStr/Comment.nvim",
-    event = "BufReadPost",
-    opts = {},
-  },
-  {
     "mg979/vim-visual-multi",
     lazy = false,
     init = function()

@@ -58,7 +58,7 @@ return {
 
           -- Highlight de referencias bajo el cursor
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
             local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
               buffer = event.buf,
@@ -150,28 +150,6 @@ return {
         capabilities = capabilities,
       })
 
-      -- C# via Roslyn (managed by roslyn.nvim plugin)
-      vim.lsp.config("roslyn", {
-        capabilities = capabilities,
-        settings = {
-          ["csharp|background_analysis"] = {
-            dotnet_analyzer_diagnostics_scope = "openFiles",
-            dotnet_compiler_diagnostics_scope = "openFiles",
-          },
-          ["csharp|completion"] = {
-            dotnet_show_completion_items_from_unimported_namespaces = true,
-            dotnet_show_name_completion_suggestions = true,
-          },
-          ["csharp|inlay_hints"] = {
-            csharp_enable_inlay_hints_for_implicit_variable_types = true,
-            csharp_enable_inlay_hints_for_types = true,
-          },
-          ["csharp|code_lens"] = {
-            dotnet_enable_references_code_lens = true,
-          },
-        },
-      })
-
       -- C/C++
       vim.lsp.config("clangd", {
         cmd = { "clangd" },
@@ -246,14 +224,12 @@ return {
         "clangd",
         "html-lsp",
         "css-lsp",
-        "roslyn",
         "zls",
 
         -- Formatters
         "stylua",
         "ruff",
         "prettier",
-        "csharpier",
         "clang-format",
 
         -- Linters

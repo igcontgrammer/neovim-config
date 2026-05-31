@@ -46,9 +46,6 @@ return {
         -- TOML
         toml = { "taplo" },
 
-        -- C#
-        cs = { "csharpier" },
-
         -- C/C++
         c = { "clang_format" },
         cpp = { "clang_format" },
@@ -76,7 +73,7 @@ return {
       -- Formato al guardar
       format_on_save = function(bufnr)
         -- Desactivar para ciertos filetypes
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true, markdown = true }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return
         end

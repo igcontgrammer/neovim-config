@@ -18,7 +18,6 @@ return {
         "python",
         "go",
         "rust",
-        "c_sharp",
         "java",
         "php",
 

@@ -7,9 +7,15 @@ return {
       local t = ls.text_node
       local i = ls.insert_node
 
-      ls.add_snippets("csharp", {
+      -- Csharp (filetype is "cs" in Neovim, not "csharp")
+      ls.add_snippets("cs", {
         s("unused", {
           t("// TODO: UNUSED, remove"),
+        }),
+        s("sepa", {
+          t("// ******* "),
+          i(1),
+          t(" *******"),
         }),
       })
 

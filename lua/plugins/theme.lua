@@ -3,20 +3,15 @@ return {
   lazy = false,
   priority = 1000,
   opts = {
-    style = "night",
-    transparent = true,
+    style = "moon",
+    transparent = false,
     styles = {
-      comments = { italic = false },
-      keywords = { italic = false },
-      functions = { italic = false },
-      variables = { italic = false },
-      sidebars = "dark",
-      floats = "dark",
+      comments = { italic = true },
+      keywords = { italic = true },
     },
   },
   config = function(_, opts)
     require("tokyonight").setup(opts)
-    vim.cmd.colorscheme("tokyonight")
+    vim.cmd.colorscheme("tokyonight-moon")
   end,
 }
-

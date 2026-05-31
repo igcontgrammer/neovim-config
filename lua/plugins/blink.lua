@@ -14,7 +14,8 @@ return {
         oil = true,
         TelescopePrompt = true,
         ["snacks_picker_input"] = true,
-      }
+        markdown = true,
+       }
       return not disabled_ft[vim.bo.filetype] and vim.bo.buftype ~= "prompt"
     end,
     snippets = { preset = "luasnip" },
