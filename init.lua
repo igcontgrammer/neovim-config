@@ -36,7 +36,7 @@ require("lazy").setup({
   },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.
-  install = { colorscheme = { "gruvbox", "habamax" } },
+  install = { colorscheme = { "onehalfdark", "habamax" } },
   -- automatically check for plugin updates
   checker = { enabled = false },
 })
@@ -60,5 +60,11 @@ require("nvim-ts-autotag").setup({
     },
   },
 })
-require("lualine").setup()
+require("lualine").setup({
+  options = {
+    theme = "onedark",
+    section_separators = { left = "", right = "" },
+    component_separators = { left = "", right = "" },
+  },
+})
 require("oil").setup()

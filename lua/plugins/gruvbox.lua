@@ -2,7 +2,7 @@ return {
   "ellisonleao/gruvbox.nvim",
   name = "gruvbox",
   lazy = false,
-  priority = 1000,
+  priority = 900,
   config = function()
     require("gruvbox").setup({
       terminal_colors = true,
@@ -25,7 +25,7 @@ return {
       overrides = {},
     })
 
-    vim.o.background = "dark"
-    vim.cmd.colorscheme("gruvbox")
+    -- Instalado pero no activo: el colorscheme lo fija onehalf.lua.
+    -- Para volver: :colorscheme gruvbox
   end,
 }

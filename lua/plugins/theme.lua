@@ -1,7 +1,7 @@
 return {
   "folke/tokyonight.nvim",
   lazy = false,
-  priority = 1000,
+  priority = 900,
   opts = {
     style = "storm", -- night | storm | day | moon
     transparent = false,
@@ -74,7 +74,7 @@ return {
       hl.Comment = { fg = c.comment, italic = true }
     end,
   },
-  -- Instalado pero no activo: el colorscheme lo fija gruvbox.lua.
+  -- Instalado pero no activo: el colorscheme lo fija onehalf.lua.
   -- Para volver: :colorscheme tokyonight-night
   config = function(_, opts)
     require("tokyonight").setup(opts)
