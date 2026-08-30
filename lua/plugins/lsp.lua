@@ -56,6 +56,15 @@ return {
             vim.lsp.buf.format({ async = true })
           end, "Format")
 
+          -- ruff: solo lint/diagnósticos. pyright maneja hover y types;
+          -- conform maneja el formateo. Evita conflictos entre ambos.
+          local attached = vim.lsp.get_client_by_id(event.data.client_id)
+          if attached and attached.name == "ruff" then
+            attached.server_capabilities.hoverProvider = false
+            attached.server_capabilities.documentFormattingProvider = false
+            attached.server_capabilities.documentRangeFormattingProvider = false
+          end
+
           -- Highlight de referencias bajo el cursor
           local client = vim.lsp.get_client_by_id(event.data.client_id)
           if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
@@ -143,6 +152,18 @@ return {
         capabilities = capabilities,
       })
 
+      -- Ruff (linter de Python como LSP, solo diagnósticos + code actions)
+      vim.lsp.config("ruff", {
+        cmd = { "ruff", "server" },
+        root_markers = {
+          "ruff.toml",
+          ".ruff.toml",
+          "pyproject.toml",
+          ".git",
+        },
+        capabilities = capabilities,
+      })
+
       -- TypeScript/JavaScript
       vim.lsp.config("ts_ls", {
         cmd = { "typescript-language-server", "--stdio" },
@@ -192,6 +213,7 @@ return {
         "lua_ls",
         "rust_analyzer",
         "pyright",
+        "ruff",
         "ts_ls",
         "clangd",
         "html",
@@ -234,6 +256,9 @@ return {
 
         -- Linters
         "eslint_d",
+
+        -- Debuggers
+        "debugpy",
       },
       auto_update = false,
       run_on_start = true,

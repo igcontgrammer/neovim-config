@@ -14,6 +14,7 @@ return {
         oil = true,
         TelescopePrompt = true,
         ["snacks_picker_input"] = true,
+        DressingInput = true,
         markdown = true,
        }
       return not disabled_ft[vim.bo.filetype] and vim.bo.buftype ~= "prompt"
@@ -42,7 +43,7 @@ return {
     completion = {
       menu = {
         border = "rounded",
-        winhighlight = "Normal:Pmenu,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+        winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
         draw = {
           treesitter = { "lsp" },
           columns = {
@@ -56,7 +57,7 @@ return {
         auto_show_delay_ms = 200,
         window = {
           border = "rounded",
-          winhighlight = "Normal:Pmenu,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+          winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
         },
       },
       ghost_text = { enabled = false },
@@ -65,7 +66,7 @@ return {
       enabled = true,
       window = {
         border = "rounded",
-        winhighlight = "Normal:Pmenu,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+        winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
       },
     },
   },

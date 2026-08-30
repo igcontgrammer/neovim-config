@@ -23,6 +23,9 @@ return {
           return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
         end
 
+        -- Liberar <C-k> (default: Info) para navegar entre ventanas
+        vim.keymap.del("n", "<C-k>", { buffer = bufnr })
+
         vim.keymap.set("n", "q", api.tree.close, opts("Close"))
         vim.keymap.set("n", "<leader>e", api.tree.close, opts("Close"))
         vim.keymap.set("n", "s", api.node.open.vertical, opts("Open: Vertical Split"))

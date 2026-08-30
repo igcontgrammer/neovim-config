@@ -90,6 +90,53 @@ map("n", "<leader>xl", "<cmd>Trouble loclist toggle<cr>", { desc = "Location lis
 map("n", "<leader>xq", "<cmd>Trouble quickfix toggle<cr>", { desc = "Quickfix" })
 map("n", "<leader>xt", "<cmd>TodoTrouble<cr>", { desc = "TODOs" })
 
+-- Symbols / outline (LSP)
+map("n", "<leader>xs", "<cmd>Trouble symbols toggle<cr>", { desc = "Symbols (outline, sin foco)" })
+map("n", "<leader>xS", "<cmd>Trouble symbols toggle focus=true<cr>", { desc = "Symbols (outline, con foco)" })
+map("n", "<leader>xo", "<cmd>Trouble lsp_document_symbols toggle win.position=right<cr>", { desc = "Symbols del documento" })
+
+-- Navegacion LSP en el panel de Trouble
+map("n", "<leader>xr", "<cmd>Trouble lsp_references toggle<cr>", { desc = "Referencias" })
+map("n", "<leader>xd", "<cmd>Trouble lsp_definitions toggle<cr>", { desc = "Definiciones" })
+map("n", "<leader>xy", "<cmd>Trouble lsp_type_definitions toggle<cr>", { desc = "Type definitions" })
+map("n", "<leader>xi", "<cmd>Trouble lsp_implementations toggle<cr>", { desc = "Implementaciones" })
+map("n", "<leader>xL", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", { desc = "LSP (defs/refs/impls)" })
+
+map("n", "<leader>xc", "<cmd>Trouble close<cr>", { desc = "Cerrar Trouble" })
+
+-- Saltar entre items sin salir del buffer (cae a quickfix si Trouble esta cerrado)
+map("n", "]x", function()
+  local trouble = require("trouble")
+  if trouble.is_open() then
+    trouble.next({ skip_groups = true, jump = true })
+  else
+    vim.cmd("cnext")
+  end
+end, { desc = "Trouble: siguiente item" })
+map("n", "[x", function()
+  local trouble = require("trouble")
+  if trouble.is_open() then
+    trouble.prev({ skip_groups = true, jump = true })
+  else
+    vim.cmd("cprev")
+  end
+end, { desc = "Trouble: item anterior" })
+
+-- Toggle diagnostics del LSP/linter (errores, warnings, hints)
+-- Uso: :DiagToggle  |  :DiagToggle on  |  :DiagToggle off
+vim.api.nvim_create_user_command("DiagToggle", function(opts)
+  local arg = opts.args
+  local target = arg == "on" and true or arg == "off" and false or not vim.diagnostic.is_enabled()
+  vim.diagnostic.enable(target)
+  vim.notify("Diagnostics " .. (target and "ON" or "OFF"), vim.log.levels.INFO)
+end, {
+  nargs = "?",
+  complete = function()
+    return { "on", "off" }
+  end,
+  desc = "Toggle LSP/linter diagnostics",
+})
+
 -- ══════════════════════════════════════════════════════════════
 -- UTILIDADES
 -- ══════════════════════════════════════════════════════════════
@@ -120,7 +167,7 @@ map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yank" })
 map("n", "]q", "<cmd>cnext<cr>zz", { desc = "Next quickfix" })
 map("n", "[q", "<cmd>cprev<cr>zz", { desc = "Prev quickfix" })
 
--- Split navigation handled by vim-tmux-navigator
+-- Split navigation handled by vim-kitty-navigator
 
 -- Resize splits
 local RESIZE_AMOUNT = 2
@@ -165,21 +212,89 @@ map("n", "<leader>ws", "<cmd>split<CR>", { desc = "Horizontal split" })
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write file" })
 
 -- Terminal (snacks.terminal) — horizontal split, bottom, persistent across toggles
-local function toggle_term()
+-- count = terminal id => `2<leader>]` abre/togglea la terminal 2
+
+-- La instancia snacks.win del buffer actual, si es una terminal
+local function cur_term()
+  local buf = vim.api.nvim_get_current_buf()
+  for _, w in ipairs(require("snacks.terminal").list()) do
+    if w.buf == buf then
+      return w
+    end
+  end
+end
+
+local function toggle_term(count)
+  if not count then
+    -- Dentro de una terminal => esconde ESA. Ojo: v:count no sirve acá,
+    -- conserva el count del último comando normal y apuntaría a otra.
+    local w = cur_term()
+    if w then
+      return w:hide()
+    end
+    count = vim.v.count1
+  end
   require("snacks.terminal").toggle(nil, {
+    count = count,
     win = { position = "bottom", height = 0.3, border = "rounded" },
   })
 end
-map({ "n", "t" }, "<leader>]", toggle_term, { desc = "Toggle terminal" })
-map({ "n", "t" }, "<C-/>", toggle_term, { desc = "Toggle terminal" })
-map({ "n", "t" }, "<C-_>", toggle_term, { desc = "Toggle terminal (tmux fallback)" })
+map({ "n", "t" }, "<leader>]", function() toggle_term() end, { desc = "Toggle terminal" })
+map({ "n", "t" }, "<C-/>", function() toggle_term() end, { desc = "Toggle terminal" })
+map({ "n", "t" }, "<C-_>", function() toggle_term() end, { desc = "Toggle terminal (tmux fallback)" })
+
+-- Nueva terminal en el primer id libre
+map({ "n", "t" }, "<leader>[", function()
+  local n = 1
+  while require("snacks.terminal").get(nil, { create = false, count = n }) do
+    n = n + 1
+  end
+  toggle_term(n)
+end, { desc = "Nueva terminal" })
+
+-- Toggle de TODAS: si hay alguna visible las esconde, si no las muestra
+map({ "n", "t" }, "<leader>}", function()
+  local terms = require("snacks.terminal").list()
+  local hide = vim.iter(terms):any(function(w)
+    return w:win_valid()
+  end)
+  for _, w in ipairs(terms) do
+    if hide then
+      w:hide()
+    else
+      w:show()
+    end
+  end
+end, { desc = "Toggle todas las terminales" })
+
+-- Elegir entre las terminales abiertas
+map({ "n", "t" }, "<leader>\\", function()
+  vim.ui.select(require("snacks.terminal").list(), {
+    prompt = "Terminales",
+    format_item = function(w)
+      local t = vim.b[w.buf].snacks_terminal or {}
+      return (t.id or "?") .. ": " .. (vim.b[w.buf].term_title or "")
+    end,
+  }, function(w)
+    if w then
+      w:show()
+      w:focus()
+    end
+  end)
+end, { desc = "Listar terminales" })
 map("t", "<leader>x", "<C-\\><C-n>", { desc = "Salir del modo terminal" })
 
--- Navegación entre splits desde terminal mode (tmux-aware)
-map("t", "<C-h>", [[<C-\><C-n><cmd>TmuxNavigateLeft<cr>]], { desc = "Navigate left" })
-map("t", "<C-j>", [[<C-\><C-n><cmd>TmuxNavigateDown<cr>]], { desc = "Navigate down" })
-map("t", "<C-k>", [[<C-\><C-n><cmd>TmuxNavigateUp<cr>]], { desc = "Navigate up" })
-map("t", "<C-l>", [[<C-\><C-n><cmd>TmuxNavigateRight<cr>]], { desc = "Navigate right" })
+-- Navegación entre splits
+map("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+
+-- Lo mismo desde terminal mode
+map("t", "<C-h>", [[<C-\><C-n><C-w>h]], { desc = "Go to left window" })
+map("t", "<C-j>", [[<C-\><C-n><C-w>j]], { desc = "Go to lower window" })
+map("t", "<C-k>", [[<C-\><C-n><C-w>k]], { desc = "Go to upper window" })
+map("t", "<C-l>", [[<C-\><C-n><C-w>l]], { desc = "Go to right window" })
 
 -- Tabs
 map("n", "<leader>tn", ":tabnew<CR>", { desc = "Nuevo Tab" })

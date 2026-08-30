@@ -19,8 +19,47 @@ return {
         }),
       })
 
-      -- TypeScript snippets
-      ls.add_snippets("typescript", {
+      -- TypeScript and TSX snippets
+      local typescript_snippets = {
+        s("clog", {
+          t("console.log("),
+          i(1, "value"),
+          t(");"),
+        }),
+        s("clogj", {
+          t("console.log(JSON.stringify("),
+          i(1, "value"),
+          t(", null, 2));"),
+        }),
+        s("imp", {
+          t("import { "),
+          i(1, "symbol"),
+          t(" } from \""),
+          i(2, "module"),
+          t("\";"),
+        }),
+        s("fn", {
+          t("export function "),
+          i(1, "name"),
+          t("("),
+          i(2, "args"),
+          t("): "),
+          i(3, "returnType"),
+          t({ " {", "  " }),
+          i(0),
+          t({ "", "}" }),
+        }),
+        s("afn", {
+          t("export async function "),
+          i(1, "name"),
+          t("("),
+          i(2, "args"),
+          t("): Promise<"),
+          i(3, "returnType"),
+          t({ "> {", "  " }),
+          i(0),
+          t({ "", "}" }),
+        }),
         s("sepa", {
           t("// ******* "),
           i(1),
@@ -30,7 +69,10 @@ return {
           t("// TODO: "),
           i(1),
         }),
-      })
+      }
+
+      ls.add_snippets("typescript", typescript_snippets)
+      ls.add_snippets("typescriptreact", typescript_snippets)
 
       -- Python snippets
       ls.add_snippets("python", {

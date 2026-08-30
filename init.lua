@@ -36,7 +36,7 @@ require("lazy").setup({
   },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.
-  install = { colorscheme = { "rose-pine", "habamax" } },
+  install = { colorscheme = { "gruvbox", "habamax" } },
   -- automatically check for plugin updates
   checker = { enabled = false },
 })
@@ -62,4 +62,3 @@ require("nvim-ts-autotag").setup({
 })
 require("lualine").setup()
 require("oil").setup()
-vim.api.nvim_set_hl(0, "Comment", { italic = true })

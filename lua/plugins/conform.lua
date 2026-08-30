@@ -5,8 +5,34 @@ return {
     cmd = { "ConformInfo" },
     opts = {
       formatters_by_ft = {
-        -- Python
-        python = { "ruff_format", "ruff_fix" },
+        -- Python: usa ruff SOLO si el proyecto tiene config de ruff
+        -- (ruff.toml, .ruff.toml o un [tool.ruff] en pyproject.toml).
+        -- Si no hay config, no formatea (no impone reglas ajenas al proyecto).
+        python = function(bufnr)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
+          local opts = { upward = true, path = vim.fs.dirname(fname) }
+
+          -- ruff.toml / .ruff.toml → config explícita de ruff
+          if vim.fs.find({ "ruff.toml", ".ruff.toml" }, opts)[1] then
+            return { "ruff_organize_imports", "ruff_fix", "ruff_format" }
+          end
+
+          -- pyproject.toml con sección [tool.ruff]
+          local pyproject = vim.fs.find({ "pyproject.toml" }, opts)[1]
+          if pyproject then
+            local ok, lines = pcall(vim.fn.readfile, pyproject)
+            if ok then
+              for _, line in ipairs(lines) do
+                if line:match("^%s*%[tool%.ruff") then
+                  return { "ruff_organize_imports", "ruff_fix", "ruff_format" }
+                end
+              end
+            end
+          end
+
+          -- Sin config de ruff → no formatea con ruff
+          return {}
+        end,
 
         -- JavaScript/TypeScript
         javascript = { "prettier" },

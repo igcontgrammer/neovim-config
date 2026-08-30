@@ -3,9 +3,17 @@ return {
     "folke/trouble.nvim",
     cmd = { "Trouble", "TroubleToggle" },
     opts = {
-      position = "bottom",
-      height = 12,
-      use_diagnostic_signs = true,
+      -- v3: las opciones viejas (position/height/use_diagnostic_signs) ya no existen.
+      focus = false, -- no robar el cursor al abrir
+      auto_close = true, -- cerrar cuando no quedan items
+      win = { position = "bottom", size = 12 },
+      modes = {
+        -- Outline de symbols a la derecha, siguiendo el cursor.
+        symbols = {
+          win = { position = "right", size = 45 },
+          auto_refresh = true,
+        },
+      },
     },
   },
   {
