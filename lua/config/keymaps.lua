@@ -122,6 +122,14 @@ map("n", "[x", function()
   end
 end, { desc = "Trouble: item anterior" })
 
+-- Toggle del LSP completo (todos los buffers, no solo el actual).
+-- Ver lua/config/lsp_toggle.lua — también :LspToggle / :LspOn / :LspOff
+-- y `NVIM_NO_LSP=1 nvim` para arrancar sin LSP.
+require("config.lsp_toggle")
+map("n", "<leader>ul", function()
+  require("config.lsp_toggle").toggle()
+end, { desc = "Toggle LSP (global)" })
+
 -- Toggle diagnostics del LSP/linter (errores, warnings, hints)
 -- Uso: :DiagToggle  |  :DiagToggle on  |  :DiagToggle off
 vim.api.nvim_create_user_command("DiagToggle", function(opts)

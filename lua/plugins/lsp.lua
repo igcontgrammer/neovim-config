@@ -152,23 +152,133 @@ return {
         capabilities = capabilities,
       })
 
-      -- Ruff (linter de Python como LSP, solo diagnósticos + code actions)
+      -- Ruff (linter de Python como LSP, solo diagnósticos + code actions).
+      -- Solo arranca si el proyecto configura ruff explícitamente; si no,
+      -- ruff lintearía con SU set de reglas por defecto (E4, E7, E9, F),
+      -- que el proyecto nunca pidió.
       vim.lsp.config("ruff", {
         cmd = { "ruff", "server" },
+        capabilities = capabilities,
+        root_dir = function(bufnr, on_dir)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
+          local dir = fname ~= "" and vim.fs.dirname(fname) or vim.fn.getcwd()
+
+          local explicit = vim.fs.find({ "ruff.toml", ".ruff.toml" }, { upward = true, path = dir })[1]
+          if explicit then
+            return on_dir(vim.fs.dirname(explicit))
+          end
+
+          local pyproject = vim.fs.find({ "pyproject.toml" }, { upward = true, path = dir })[1]
+          if pyproject then
+            local ok, lines = pcall(vim.fn.readfile, pyproject)
+            if ok then
+              for _, line in ipairs(lines) do
+                if line:match("^%s*%[tool%.ruff") then
+                  return on_dir(vim.fs.dirname(pyproject))
+                end
+              end
+            end
+          end
+          -- Sin config de ruff → no se arranca el servidor.
+        end,
+      })
+
+      -- ESLint: el linter del proyecto para JS/TS. Solo arranca si el
+      -- proyecto trae config de eslint (root_markers), y usa las reglas
+      -- de esa config, no unas propias.
+      vim.lsp.config("eslint", {
+        cmd = { "vscode-eslint-language-server", "--stdio" },
         root_markers = {
-          "ruff.toml",
-          ".ruff.toml",
-          "pyproject.toml",
-          ".git",
+          "eslint.config.js",
+          "eslint.config.mjs",
+          "eslint.config.cjs",
+          "eslint.config.ts",
+          "eslint.config.mts",
+          "eslint.config.cts",
+          ".eslintrc",
+          ".eslintrc.js",
+          ".eslintrc.cjs",
+          ".eslintrc.json",
+          ".eslintrc.yaml",
+          ".eslintrc.yml",
         },
         capabilities = capabilities,
       })
 
       -- TypeScript/JavaScript
+      --
+      -- TypeScript 7 es el compilador nativo en Go: no trae tsserver.js, así que
+      -- ts_ls (un wrapper de Node sobre tsserver.js) no puede usar el TS del
+      -- proyecto y cae en silencio a su copia bundleada. En esos proyectos usamos
+      -- el LSP nativo (`tsc --lsp --stdio`) y ts_ls no engancha.
+
+      --- Devuelve el directorio que contiene el node_modules/typescript del
+      --- workspace si ese TypeScript es 7+; nil en cualquier otro caso.
+      --- @return string?
+      local function native_ts_dir(bufnr)
+        local name = vim.api.nvim_buf_get_name(bufnr)
+        if name == "" then
+          return nil
+        end
+        for dir in vim.fs.parents(name) do
+          local pkg = dir .. "/node_modules/typescript/package.json"
+          if vim.uv.fs_stat(pkg) then
+            local ok, json = pcall(function()
+              return vim.json.decode(table.concat(vim.fn.readfile(pkg), "\n"))
+            end)
+            if not ok or type(json) ~= "table" then
+              return nil
+            end
+            local version = vim.version.parse(json.version or "")
+            return (version and version.major >= 7) and dir or nil
+          end
+        end
+        return nil
+      end
+
+      local ts_ls_root_dir = vim.lsp.config.ts_ls.root_dir
+
       vim.lsp.config("ts_ls", {
         cmd = { "typescript-language-server", "--stdio" },
         root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
         capabilities = capabilities,
+        root_dir = function(bufnr, on_dir)
+          if native_ts_dir(bufnr) then
+            return
+          end
+          if ts_ls_root_dir then
+            return ts_ls_root_dir(bufnr, on_dir)
+          end
+          on_dir(vim.fs.root(bufnr, { "tsconfig.json", "jsconfig.json", "package.json", ".git" }))
+        end,
+      })
+
+      -- TypeScript nativo (7+). Reusamos el root_dir de lspconfig (sabe de
+      -- monorepos y descarta proyectos Deno) pero resolvemos el binario nosotros:
+      -- el suyo lo cachea en un upvalue que no sobrevive al merge del config.
+      local tsc_root_dir = vim.lsp.config.tsc.root_dir
+      local tsc_bin = {} ---@type table<string, string>
+
+      vim.lsp.config("tsc", {
+        capabilities = capabilities,
+        root_dir = function(bufnr, on_dir)
+          local dir = native_ts_dir(bufnr)
+          if not dir then
+            return
+          end
+          local bin = dir .. "/node_modules/.bin/tsc"
+          if vim.fn.executable(bin) ~= 1 then
+            return
+          end
+          tsc_root_dir(bufnr, function(root)
+            tsc_bin[root] = bin
+            on_dir(root)
+          end)
+        end,
+        cmd = function(dispatchers, config)
+          local bin = tsc_bin[(config or {}).root_dir] or "tsc"
+          return vim.lsp.rpc.start({ bin, "--lsp", "--stdio" }, dispatchers)
+        end,
       })
 
       -- C/C++
@@ -208,13 +318,16 @@ return {
         capabilities = capabilities,
       })
 
-      -- Habilitar todos los LSP servers
-      vim.lsp.enable({
+      -- Habilitar todos los LSP servers. Va por config.lsp_toggle para poder
+      -- apagarlos/prenderlos en todo Neovim con <leader>ul / :LspToggle.
+      require("config.lsp_toggle").register({
         "lua_ls",
         "rust_analyzer",
         "pyright",
         "ruff",
+        "eslint",
         "ts_ls",
+        "tsc",
         "clangd",
         "html",
         "cssls",
@@ -243,6 +356,7 @@ return {
         "rust-analyzer",
         "pyright",
         "typescript-language-server",
+        "eslint-lsp",
         "clangd",
         "html-lsp",
         "css-lsp",

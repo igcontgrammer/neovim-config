@@ -1,48 +1,81 @@
+-- Regla de oro de este archivo:
+-- SOLO se formatea si el proyecto trae su propia config de formateo.
+-- Nunca se pasan flags de estilo propios (indent, quotes, line-length...):
+-- esos los decide el archivo de config del proyecto, no Neovim.
+
+-- Busca hacia arriba desde el archivo del buffer (no desde el cwd).
+local function find_up(bufnr, names)
+  local fname = vim.api.nvim_buf_get_name(bufnr)
+  local dir = fname ~= "" and vim.fs.dirname(fname) or vim.fn.getcwd()
+  return vim.fs.find(names, { upward = true, path = dir })[1]
+end
+
+-- ¿pyproject.toml con una sección [tool.<name>]?
+local function pyproject_has(bufnr, name)
+  local pyproject = find_up(bufnr, { "pyproject.toml" })
+  if not pyproject then
+    return false
+  end
+  local ok, lines = pcall(vim.fn.readfile, pyproject)
+  if not ok then
+    return false
+  end
+  for _, line in ipairs(lines) do
+    if line:match("^%s*%[tool%." .. name) then
+      return true
+    end
+  end
+  return false
+end
+
+-- Activa `formatters` solo si el proyecto tiene alguno de `markers`.
+local function project_only(markers, formatters)
+  return function(bufnr)
+    return find_up(bufnr, markers) and formatters or {}
+  end
+end
+
+local ruff_config = { "ruff.toml", ".ruff.toml" }
+
 return {
   {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
     cmd = { "ConformInfo" },
+    keys = {
+      {
+        "<leader>uf",
+        function()
+          vim.g.disable_autoformat = not vim.g.disable_autoformat
+          vim.notify("Autoformat " .. (vim.g.disable_autoformat and "OFF" or "ON"))
+        end,
+        desc = "Toggle autoformat on save",
+      },
+    },
     opts = {
       formatters_by_ft = {
-        -- Python: usa ruff SOLO si el proyecto tiene config de ruff
-        -- (ruff.toml, .ruff.toml o un [tool.ruff] en pyproject.toml).
-        -- Si no hay config, no formatea (no impone reglas ajenas al proyecto).
+        -- Python: ruff solo si el proyecto lo configura
+        -- (ruff.toml, .ruff.toml o [tool.ruff] en pyproject.toml).
         python = function(bufnr)
-          local fname = vim.api.nvim_buf_get_name(bufnr)
-          local opts = { upward = true, path = vim.fs.dirname(fname) }
-
-          -- ruff.toml / .ruff.toml → config explícita de ruff
-          if vim.fs.find({ "ruff.toml", ".ruff.toml" }, opts)[1] then
+          if find_up(bufnr, ruff_config) or pyproject_has(bufnr, "ruff") then
             return { "ruff_organize_imports", "ruff_fix", "ruff_format" }
           end
-
-          -- pyproject.toml con sección [tool.ruff]
-          local pyproject = vim.fs.find({ "pyproject.toml" }, opts)[1]
-          if pyproject then
-            local ok, lines = pcall(vim.fn.readfile, pyproject)
-            if ok then
-              for _, line in ipairs(lines) do
-                if line:match("^%s*%[tool%.ruff") then
-                  return { "ruff_organize_imports", "ruff_fix", "ruff_format" }
-                end
-              end
-            end
+          if pyproject_has(bufnr, "black") then
+            return { "black" }
           end
-
-          -- Sin config de ruff → no formatea con ruff
           return {}
         end,
 
-        -- JavaScript/TypeScript
+        -- JS/TS/Web: prettier lleva `require_cwd = true` abajo, así que
+        -- solo corre si encuentra .prettierrc* / prettier.config.* o la
+        -- clave "prettier" en package.json. Y usa el binario de
+        -- node_modules/.bin del proyecto si existe.
         javascript = { "prettier" },
         typescript = { "prettier" },
         javascriptreact = { "prettier" },
         typescriptreact = { "prettier" },
         vue = { "prettier" },
         svelte = { "prettier" },
-
-        -- Web
         html = { "prettier" },
         css = { "prettier" },
         scss = { "prettier" },
@@ -52,83 +85,49 @@ return {
         markdown = { "prettier" },
         graphql = { "prettier" },
 
-        -- Go
+        -- Formatters canónicos del lenguaje: no hay "estilo propio" que
+        -- imponer, y ya leen su config del proyecto si existe
+        -- (rustfmt.toml, .clang-format, etc.).
         go = { "gofmt", "goimports" },
-
-        -- Rust
-        rust = {},
-
-        -- Lua
-        lua = { "stylua" },
-
-        -- Shell
-        sh = { "shfmt" },
-        bash = { "shfmt" },
-        zsh = { "shfmt" },
-
-        -- SQL
-        sql = { "sql_formatter" },
-
-        -- TOML
-        toml = { "taplo" },
-
-        -- C/C++
-        c = { "clang_format" },
-        cpp = { "clang_format" },
-
-        -- Java
-        java = { "google-java-format" },
-
-        -- PHP
-        php = { "pint", "php_cs_fixer" },
-
-        -- Ruby
-        ruby = { "rubocop" },
-
-        -- Terraform
+        rust = { "rustfmt" },
         terraform = { "terraform_fmt" },
         tf = { "terraform_fmt" },
-
-        -- Nix
         nix = { "nixfmt" },
+        toml = { "taplo" },
 
-        -- Cualquier archivo (fallback)
-        ["_"] = { "trim_whitespace", "trim_newlines" },
+        -- Con estilo propio → solo con config del proyecto.
+        lua = project_only({ ".stylua.toml", "stylua.toml" }, { "stylua" }),
+        c = project_only({ ".clang-format" }, { "clang_format" }),
+        cpp = project_only({ ".clang-format" }, { "clang_format" }),
+        sh = project_only({ ".editorconfig" }, { "shfmt" }),
+        bash = project_only({ ".editorconfig" }, { "shfmt" }),
+        zsh = project_only({ ".editorconfig" }, { "shfmt" }),
+        sql = project_only({ ".sql-formatter.json" }, { "sql_formatter" }),
+        ruby = project_only({ ".rubocop.yml", ".rubocop.toml" }, { "rubocop" }),
+        php = project_only({ "pint.json" }, { "pint" }),
+        java = project_only({ ".java-format.xml" }, { "google-java-format" }),
+
+        -- Sin fallback "_": tocar whitespace en todos los archivos mete
+        -- diffs que el proyecto no pidió.
       },
 
-      -- Formato al guardar
       format_on_save = function(bufnr)
-        -- Desactivar para ciertos filetypes
-        local disable_filetypes = { c = true, cpp = true, markdown = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return
-        end
-
-        -- Desactivar si hay variable global
         if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
           return
         end
-
         return {
           timeout_ms = 3000,
-          lsp_fallback = true,
+          -- El LSP formatea con SU estilo por defecto (clangd → LLVM,
+          -- ts_ls → su propio estilo) aunque el proyecto no lo pida.
+          lsp_format = "never",
         }
       end,
 
-      -- Configuración por formatter
       formatters = {
-        shfmt = {
-          prepend_args = { "-i", "2", "-ci" },
-        },
-        prettier = {
-          prepend_args = { "--tab-width", "2", "--single-quote" },
-        },
-        stylua = {
-          prepend_args = { "--indent-type", "Spaces", "--indent-width", "2" },
-        },
-        ruff_format = {
-          prepend_args = { "--line-length", "100" },
-        },
+        -- Sin config de prettier en el proyecto → no se formatea.
+        prettier = { require_cwd = true },
+        -- Sin prepend_args en ningún formatter: el estilo lo manda el
+        -- archivo de config del proyecto.
       },
     },
 
