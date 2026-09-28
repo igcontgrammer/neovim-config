@@ -87,8 +87,21 @@ return {
         },
       })
 
-      -- live_grep: excluir archivos/carpetas generados que rg no ignora
       opts.pickers = opts.pickers or {}
+
+      -- find_files: include dotfiles, plus .env* files even when gitignored
+      -- (a second rg pass bypasses .gitignore only for .env*; awk dedupes).
+      opts.pickers.find_files = vim.tbl_deep_extend("force", opts.pickers.find_files or {}, {
+        find_command = {
+          "sh",
+          "-c",
+          "{ rg --files --hidden --glob '!**/.git/**';"
+            .. " rg --files --hidden --no-ignore --glob '**/.env*'"
+            .. " --glob '!**/node_modules/**' --glob '!**/.git/**'; } | awk '!seen[$0]++'",
+        },
+      })
+
+      -- live_grep: excluir archivos/carpetas generados que rg no ignora
       opts.pickers.live_grep = vim.tbl_deep_extend("force", opts.pickers.live_grep or {}, {
         vimgrep_arguments = {
           "rg",

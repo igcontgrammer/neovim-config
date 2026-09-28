@@ -26,6 +26,10 @@ return {
         -- Backend
         "python",
         "go",
+        "gomod",
+        "gosum",
+        "gowork",
+        "gotmpl",
         "rust",
         "java",
         "php",

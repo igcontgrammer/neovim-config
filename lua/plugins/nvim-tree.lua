@@ -12,6 +12,13 @@ return {
       view = {
         width = 45,
       },
+      filters = {
+        dotfiles = false,
+        git_ignored = true,
+        -- Lua patterns on the absolute path; they override git_ignored,
+        -- so gitignored .env files stay visible.
+        exclude = { "/%.env[^/]*$" },
+      },
       on_attach = function(bufnr)
         local api = require("nvim-tree.api")
 

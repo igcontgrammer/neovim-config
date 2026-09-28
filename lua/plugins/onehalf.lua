@@ -260,7 +260,7 @@ return {
       end,
     })
 
-    vim.o.background = "dark"
-    vim.cmd.colorscheme("onehalfdark") -- onehalflight para la variante clara
+    -- Installed but inactive: tokyonight (theme.lua) sets the colorscheme.
+    -- To switch back: :colorscheme onehalfdark
   end,
 }

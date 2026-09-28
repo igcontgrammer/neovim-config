@@ -32,6 +32,14 @@ return {
     },
   },
   {
+    -- Detecta la indentación de cada archivo (2 vs 4 espacios, tabs) y ajusta
+    -- shiftwidth/expandtab. Sin esto, el indentexpr de treesitter usa el
+    -- shiftwidth global (4) y `o` indenta de más en archivos con 2 espacios.
+    "NMAC427/guess-indent.nvim",
+    event = "BufReadPost",
+    opts = {},
+  },
+  {
     "MagicDuck/grug-far.nvim",
     cmd = { "GrugFar", "GrugFarWithin" },
     opts = {

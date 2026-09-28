@@ -52,6 +52,7 @@ return {
       "antoinemadec/FixCursorHold.nvim",
       "nvim-treesitter/nvim-treesitter",
       "nvim-neotest/neotest-python",
+      "fredrikaverpil/neotest-golang",
     },
     keys = {
       { "<leader>tt", function() require("neotest").run.run() end, desc = "Test: Run nearest" },
@@ -68,6 +69,9 @@ return {
           require("neotest-python")({
             dap = { justMyCode = false },
             runner = "pytest",
+          }),
+          require("neotest-golang")({
+            go_test_args = { "-v", "-race", "-count=1" },
           }),
         },
       })

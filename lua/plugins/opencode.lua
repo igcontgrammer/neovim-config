@@ -1,15 +1,40 @@
+-- OpenCode v2 dropped the `--port` flag: the TUI now talks to a background
+-- service and opencode.nvim discovers it via ~/.local/state/opencode/service.json.
+local opencode_cmd = "opencode"
+
+local function terminal_opts()
+  return {
+    win = { position = "left", width = math.floor(vim.o.columns * 0.35) },
+  }
+end
+
+-- opencode.nvim v2 `prompt()` sends text literally; named prompts no longer exist.
+local function prompt(text)
+  return function()
+    require("opencode").prompt(text)
+  end
+end
+
 return {
   "NickvanDyke/opencode.nvim",
   dependencies = {
     { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
   },
+  init = function()
+    ---@type opencode.Opts
+    vim.g.opencode_opts = {
+      server = {
+        start = function()
+          require("snacks.terminal").open(opencode_cmd, terminal_opts())
+        end,
+      },
+    }
+  end,
   keys = {
     {
       "<leader>aa",
       function()
-        require("snacks.terminal").toggle("opencode --port", {
-          win = { position = "left", width = math.floor(vim.o.columns * 0.35) },
-        })
+        require("snacks.terminal").toggle(opencode_cmd, terminal_opts())
       end,
       mode = { "n" },
       desc = "Toggle OpenCode",
@@ -46,76 +71,22 @@ return {
       mode = { "n", "x" },
       desc = "OpenCode ask about buffer",
     },
-    {
-      "<leader>ap",
-      function()
-        require("opencode").prompt("@this")
-      end,
-      mode = { "n", "x" },
-      desc = "OpenCode prompt",
-    },
-    -- Built-in prompts
-    {
-      "<leader>ape",
-      function()
-        require("opencode").prompt("explain")
-      end,
-      mode = { "n", "x" },
-      desc = "OpenCode explain",
-    },
-    {
-      "<leader>apf",
-      function()
-        require("opencode").prompt("fix")
-      end,
-      mode = { "n", "x" },
-      desc = "OpenCode fix",
-    },
-    {
-      "<leader>apd",
-      function()
-        require("opencode").prompt("diagnose")
-      end,
-      mode = { "n", "x" },
-      desc = "OpenCode diagnose",
-    },
+    { "<leader>ap", prompt("@this"), mode = { "n", "x" }, desc = "OpenCode prompt" },
+    { "<leader>ape", prompt("Explain @this and its context"), mode = { "n", "x" }, desc = "OpenCode explain" },
+    { "<leader>apf", prompt("Fix @diagnostics"), mode = { "n", "x" }, desc = "OpenCode fix" },
+    { "<leader>apd", prompt("Explain @diagnostics"), mode = { "n", "x" }, desc = "OpenCode diagnose" },
     {
       "<leader>apr",
-      function()
-        require("opencode").prompt("review")
-      end,
+      prompt("Review @this for correctness and readability"),
       mode = { "n", "x" },
       desc = "OpenCode review",
     },
-    {
-      "<leader>apt",
-      function()
-        require("opencode").prompt("test")
-      end,
-      mode = { "n", "x" },
-      desc = "OpenCode test",
-    },
+    { "<leader>apt", prompt("Add tests for @this"), mode = { "n", "x" }, desc = "OpenCode test" },
     {
       "<leader>apo",
-      function()
-        require("opencode").prompt("optimize")
-      end,
+      prompt("Optimize @this for performance and readability"),
       mode = { "n", "x" },
       desc = "OpenCode optimize",
     },
   },
-  config = function()
-    local cmd = "opencode --port"
-    local snacks_opts = {
-      win = { position = "left", width = math.floor(vim.o.columns * 0.35) },
-    }
-    vim.g.opencode_opts = {
-      server = {
-        start = function()
-          require("snacks.terminal").open(cmd, snacks_opts)
-        end,
-      },
-    }
-    vim.o.autoread = true
-  end,
 }

@@ -30,7 +30,7 @@ opt.scrolloff = 8 -- Líneas de padding arriba/abajo
 opt.sidescrolloff = 8 -- Columnas de padding izquierda/derecha
 
 -- Update time
-opt.updatetime = 100
+opt.updatetime = 250 -- 100ms fires LSP documentHighlight too often
 opt.timeoutlen = 300
 
 -- Undo
@@ -63,7 +63,7 @@ vim.diagnostic.config({
     source = "if_many",
   },
   float = {
-    source = "always",
+    source = true,
     border = "rounded",
   },
   severity_sort = true,

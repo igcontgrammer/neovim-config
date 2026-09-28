@@ -16,13 +16,13 @@ return {
           prefix = "●",
           spacing = 4,
         },
-        signs = true,
+        -- signs: keep the custom icons set in config/options.lua
         underline = true,
         update_in_insert = false,
         severity_sort = true,
         float = {
           border = border,
-          source = "always",
+          source = true,
           header = "",
           prefix = "",
         },
@@ -132,6 +132,23 @@ return {
           ["rust-analyzer"] = {
             check = {
               command = "clippy",
+              -- target-dir propio: si clippy comparte target/debug con
+              -- `cargo build` / `tauri dev`, los dos se bloquean entre si
+              -- esperando el lock de cargo. Cuesta disco, no tiempo.
+              extraArgs = { "--target-dir", "target/rust-analyzer" },
+            },
+            cargo = {
+              -- allFeatures activa features que el proyecto no compila
+              -- (en tauri son muchas y caras). Solo las que pide Cargo.toml.
+              allFeatures = false,
+              buildScripts = { enable = true },
+            },
+            -- Sin cache priming el servidor esta usable en segundos en vez
+            -- de indexar el grafo entero de deps antes de responder nada.
+            cachePriming = { enable = false },
+            procMacro = { enable = true },
+            files = {
+              excludeDirs = { "node_modules", "dist", "target", ".git" },
             },
           },
         },
@@ -281,6 +298,44 @@ return {
         end,
       })
 
+      -- Go
+      vim.lsp.config("gopls", {
+        cmd = { "gopls" },
+        filetypes = { "go", "gomod", "gowork", "gotmpl" },
+        root_markers = { "go.work", "go.mod", ".git" },
+        capabilities = capabilities,
+        settings = {
+          gopls = {
+            completeUnimported = true,
+            usePlaceholders = true,
+            staticcheck = true,
+            semanticTokens = true,
+            directoryFilters = { "-.git", "-node_modules", "-vendor" },
+            analyses = {
+              unusedparams = true,
+              unusedvariable = true,
+              unusedwrite = true,
+              nilness = true,
+              shadow = true,
+            },
+            codelenses = {
+              generate = true,
+              test = true,
+              tidy = true,
+              upgrade_dependency = true,
+            },
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+          },
+        },
+      })
+
       -- C/C++
       vim.lsp.config("clangd", {
         cmd = { "clangd" },
@@ -328,6 +383,7 @@ return {
         "eslint",
         "ts_ls",
         "tsc",
+        "gopls",
         "clangd",
         "html",
         "cssls",
@@ -361,18 +417,21 @@ return {
         "html-lsp",
         "css-lsp",
         "zls",
+        "gopls",
 
         -- Formatters
         "stylua",
         "ruff",
         "prettier",
         "clang-format",
+        "goimports",
 
         -- Linters
         "eslint_d",
 
         -- Debuggers
         "debugpy",
+        "delve",
       },
       auto_update = false,
       run_on_start = true,

@@ -88,7 +88,8 @@ return {
         -- Formatters canónicos del lenguaje: no hay "estilo propio" que
         -- imponer, y ya leen su config del proyecto si existe
         -- (rustfmt.toml, .clang-format, etc.).
-        go = { "gofmt", "goimports" },
+        -- goimports already runs gofmt, so a separate gofmt pass is redundant.
+        go = { "goimports" },
         rust = { "rustfmt" },
         terraform = { "terraform_fmt" },
         tf = { "terraform_fmt" },

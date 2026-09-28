@@ -1,9 +1,9 @@
 return {
   "folke/tokyonight.nvim",
   lazy = false,
-  priority = 900,
+  priority = 1000,
   opts = {
-    style = "storm", -- night | storm | day | moon
+    style = "night", -- night | storm | day | moon
     transparent = false,
     terminal_colors = true,
     styles = {
@@ -74,9 +74,8 @@ return {
       hl.Comment = { fg = c.comment, italic = true }
     end,
   },
-  -- Instalado pero no activo: el colorscheme lo fija onehalf.lua.
-  -- Para volver: :colorscheme tokyonight-night
   config = function(_, opts)
     require("tokyonight").setup(opts)
+    vim.cmd.colorscheme("tokyonight-night")
   end,
 }

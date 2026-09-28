@@ -23,6 +23,15 @@ return {
     keymap = {
       preset = "default",
       ["<CR>"] = { "accept", "fallback" },
+      -- <Tab>: 1) acepta la sugerencia de Copilot si hay una visible,
+      -- 2) salta al siguiente placeholder del snippet, 3) Tab normal.
+      ["<Tab>"] = {
+        function()
+          return require("config.copilot_tab").accept_keys()
+        end,
+        "snippet_forward",
+        "fallback",
+      },
       ["<S-Tab>"] = { "snippet_backward", "fallback" },
       ["<C-n>"] = { "select_next", "fallback" },
       ["<C-p>"] = { "select_prev", "fallback" },
